@@ -26,10 +26,6 @@ const App = () => {
     }
   };
 
-  const handleCapture = () => {
-    alert('Image capture functionality is not yet implemented.');
-  };
-
   const fetchAnimalInfo = async (animal) => {
     try {
       setIsLoading(true);
@@ -209,7 +205,15 @@ const App = () => {
               fontWeight: 'bold',
               transition: 'background-color 0.3s ease',
             }}>
-              <Upload style={{ marginRight: '10px' }} /> Upload Image
+              {isMobile ? (
+                <>
+                  <Camera style={{ marginRight: '10px' }} /> Capture Image
+                </>
+              ) : (
+                <>
+                  <Upload style={{ marginRight: '10px' }} /> Upload Image
+                </>
+              )}
               <input
                 id="upload-image"
                 type="file"
@@ -218,24 +222,6 @@ const App = () => {
                 onChange={handleImageUpload}
               />
             </label>
-
-            {/* Capture Button for Mobile */}
-            {isMobile && (
-              <button
-                onClick={handleCapture}
-                style={{
-                  backgroundColor: '#007aff',
-                  color: '#fff',
-                  padding: '15px 30px',
-                  borderRadius: '12px',
-                  cursor: 'pointer',
-                  fontSize: '1.2rem',
-                  fontWeight: 'bold',
-                  transition: 'background-color 0.3s ease',
-                }}>
-                <Camera style={{ marginRight: '10px' }} /> Capture Image
-              </button>
-            )}
           </div>
         </div>
       ) : (
