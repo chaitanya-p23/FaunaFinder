@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useMediaQuery } from 'react-responsive';
 import axios from 'axios';
-import { Camera, Upload, Loader2 } from 'lucide-react';
+import { Camera, Upload, Loader2, SunMoon, RotateCcw } from 'lucide-react';
 
 const App = () => {
   const [identifiedAnimal, setIdentifiedAnimal] = useState('');
@@ -124,14 +124,14 @@ const App = () => {
         </h1>
 
         {/* Button Container for Recalculate and Dark Mode Toggle */}
-        <div style={{ display: 'flex', gap: '20px' }}>
+        <div style={{ display: 'flex', gap: '10px' }}>
           {/* Dark Mode Toggle Button */}
           <button
             onClick={toggleDarkMode}
             style={{
-              backgroundColor: isDarkMode ? '#fff' : '#000',
+              backgroundColor: isDarkMode ? '#aaa' : '#696969',
               color: isDarkMode ? '#000' : '#fff',
-              padding: '10px 20px',
+              padding: isMobile ? '7px 13px' : '10px 20px',
               borderRadius: '12px',
               border: 'none',
               fontWeight: 'bold',
@@ -139,7 +139,7 @@ const App = () => {
               fontSize: '1rem',
               transition: 'background-color 0.3s ease, color 0.3s ease'
             }}>
-            {isDarkMode ? 'Light Mode' : 'Dark Mode'}
+            {isDarkMode ? <SunMoon /> : <SunMoon />}
           </button>
 
           {animalInfo && (
@@ -148,7 +148,7 @@ const App = () => {
               style={{
                 backgroundColor: '#007aff',
                 color: '#fff',
-                padding: '10px 20px',
+                padding: isMobile ? '7px 13px' : '10px 20px',
                 borderRadius: '12px',
                 border: 'none',
                 fontWeight: 'bold',
@@ -158,7 +158,7 @@ const App = () => {
               }}
               disabled={isLoading}
             >
-              {isLoading ? <Loader2 className="mr-2 animate-spin" /> : 'Recalculate'}
+              {isLoading ? <Loader2 className="mr-2 animate-spin" /> : <RotateCcw />}
             </button>
           )}
         </div>
@@ -206,13 +206,13 @@ const App = () => {
               transition: 'background-color 0.3s ease',
             }}>
               {isMobile ? (
-                <>
+                <div style ={{ display: 'flex' }}>
                   <Camera style={{ marginRight: '10px' }} /> Capture Image
-                </>
+                </div>
               ) : (
-                <>
+                <div style ={{ display: 'flex' }}>
                   <Upload style={{ marginRight: '10px' }} /> Upload Image
-                </>
+                </div>
               )}
               <input
                 id="upload-image"
