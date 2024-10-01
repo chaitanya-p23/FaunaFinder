@@ -17,7 +17,10 @@
 
 ## User Interface
 
-### Desktop View
+
+
+<details>
+<summary><b>Desktop View</b></summary>
 
 ![Desktop View 1](assets/desktop/landing-page-dark-mode.png)
 ![Desktop View 2](assets/desktop/landing-page-light-mode.png)
@@ -25,14 +28,27 @@
 ![Desktop View 4](assets/desktop/result-page-dark-mode.png)
 ![Desktop View 5](assets/desktop/result-page-light-mode.png)
 
-### Mobile View
+</details>
 
-![Mobile View 1](assets/mobile/landing-page-dark-mode.png)
-![Mobile View 2](assets/mobile/landing-page-light-mode.png)
-![Mobile View 3](assets/mobile/capture-image-options.png)
-![Mobile View 4](assets/mobile/image-upload.png)
-![Mobile View 5](assets/mobile/result-page-dark-mode.png)
-![Mobile View 6](assets/mobile/result-page-light-mode.png)
+<details>
+    <summary><b>Mobile View</b></summary>
+
+<div>
+    <img src="./assets/mobile/landing-page-dark-mode.png" width="49%">
+    <img src="./assets/mobile/landing-page-light-mode.png" width="49%">
+</div>
+
+<div>
+    <img src="./assets/mobile/capture-image-options.png" width="49%">
+    <img src="./assets/mobile/image-upload.png" width="49%">
+</div>
+
+<div>
+    <img src="./assets/mobile/result-page-dark-mode.png" width="49%">
+    <img src="./assets/mobile/result-page-light-mode.png" width="49%">
+</div>
+
+</details>
 
 ## Contributing
 
