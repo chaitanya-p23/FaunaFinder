@@ -1,86 +1,50 @@
 import React, { useState } from 'react';
 import { useMediaQuery } from 'react-responsive';
 import axios from 'axios';
-import { Camera, Upload, Loader2, SunMoon, RotateCcw } from 'lucide-react';
+import { Camera, Upload, SunMoon } from 'lucide-react';
 
 const App = () => {
   const [identifiedAnimal, setIdentifiedAnimal] = useState('');
   const [animalInfo, setAnimalInfo] = useState(null);
   const [scientificClassification, setScientificClassification] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState((window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches));
   const isMobile = useMediaQuery({ maxWidth: 767 });
   const isDesktop = useMediaQuery({ minWidth: 768 });
-  // const [image, setImage] = useState(null);
+  const [img_url,setImage] = useState('');
 
-  const handleImageUpload = (event) => {
+  const handleImageUpload = async (event) => {
     const file = event.target.files[0];
     if (file) {
-      // setImage(URL.createObjectURL(file));
-      setIsLoading(true);
-      setTimeout(() => {
-        const animalName = prompt("Enter Animal name: ");
-        setIdentifiedAnimal(animalName); // Placeholder for TensorFlow model
-        fetchAnimalInfo(animalName);
-      }, 1000);
+      const formData = new FormData();
+      formData.append('image', file);
+  
+      // Fetch the raw response and parse manually
+      axios.post('http://localhost:5000/api/classify', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+        transformResponse: [data => data], // Keep raw response as string
+      }).then(response => {
+        // Parse response to preserve key order
+        const orderedData = JSON.parse(response.data, (key, value) => value);
+  
+        // Now use this orderedData
+        setIdentifiedAnimal(orderedData.label);
+        setImage(orderedData.imgurl);
+        fetchAnimalInfo(orderedData);
+      }).catch(error => {
+        alert(error);
+      });
     }
-  };
+  };      
 
-  const fetchAnimalInfo = async (animal) => {
+  const fetchAnimalInfo = async (resp) => {
     try {
-      setIsLoading(true);
-      
-      // Fetch Wikipedia summary
-      const summary = await axios.get(`https://en.wikipedia.org/api/rest_v1/page/summary/${animal}`);
-      setAnimalInfo(summary.data);
-
-      // Fetch Wikidata entity ID
-      const wikidata = await axios.get(`https://www.wikidata.org/w/api.php?action=wbgetentities&sites=enwiki&titles=${animal}&props=claims&format=json&origin=*`);
-      const entityId = Object.keys(wikidata.data.entities)[0];
-
-      // Fetch taxonomy data
-      const taxonomyResponse = await axios.get(`https://www.wikidata.org/w/api.php?action=wbgetclaims&entity=${entityId}&property=P171&format=json&origin=*`);
-      const taxonomyClaims = taxonomyResponse.data.claims.P171;
-
-      const classificationLevels = [
-        { name: 'Kingdom', property: 'P105', value: 'Q36732' },
-        { name: 'Phylum', property: 'P105', value: 'Q37517' },
-        { name: 'Class', property: 'P105', value: 'Q36460' },
-        { name: 'Order', property: 'P105', value: 'Q36602' },
-        { name: 'Family', property: 'P105', value: 'Q35409' },
-        { name: 'Genus', property: 'P105', value: 'Q34740' },
-        { name: 'Species', property: 'P105', value: 'Q7432' }
-      ];
-
-      const classification = {};
-
-      for (const claim of taxonomyClaims) {
-        const taxonId = claim.mainsnak.datavalue.value.id;
-        const taxonData = await axios.get(`https://www.wikidata.org/w/api.php?action=wbgetentities&ids=${taxonId}&props=labels|claims&languages=en&format=json&origin=*`);
-        
-        const taxonName = taxonData.data.entities[taxonId].labels.en.value;
-        const taxonRankId = taxonData.data.entities[taxonId].claims.P105[0].mainsnak.datavalue.value.id;
-        
-        const level = classificationLevels.find(level => level.value === taxonRankId);
-        if (level) {
-          classification[level.name] = taxonName;
-        }
-      }
-
-      // Add the species name (which is the animal we're looking up)
-      classification['Species'] = animal;
-
-      setScientificClassification(classification);
-      setIsLoading(false);
+      setAnimalInfo(resp.summary);
+      setScientificClassification(resp.taxonomy);
     } catch (error) {
       console.error('Error fetching animal info:', error);
-      setIsLoading(false);
     }
-  };
-
-  const handleRecalculate = () => {
-    setIsLoading(true);
-    fetchAnimalInfo(identifiedAnimal);
   };
 
   const toggleDarkMode = () => {
@@ -141,26 +105,6 @@ const App = () => {
             }}>
             {isDarkMode ? <SunMoon /> : <SunMoon />}
           </button>
-
-          {animalInfo && (
-            <button
-              onClick={handleRecalculate}
-              style={{
-                backgroundColor: '#007aff',
-                color: '#fff',
-                padding: isMobile ? '7px 13px' : '10px 20px',
-                borderRadius: '12px',
-                border: 'none',
-                fontWeight: 'bold',
-                cursor: 'pointer',
-                fontSize: '1rem',
-                transition: 'background-color 0.3s ease',
-              }}
-              disabled={isLoading}
-            >
-              {isLoading ? <Loader2 className="mr-2 animate-spin" /> : <RotateCcw />}
-            </button>
-          )}
         </div>
       </header>
 
@@ -237,7 +181,7 @@ const App = () => {
           <div style={{ flex: '1', position: 'relative' }}>
             <div style={{ position: 'relative' }}>
               <img
-                src={animalInfo.thumbnail?.source || '/placeholder.jpg'}
+                src={animalInfo.thumbnail?.source || img_url}
                 alt={identifiedAnimal}
                 style={{
                   width: '100%',
@@ -274,7 +218,7 @@ const App = () => {
               color: isDarkMode ? '#fff' : '#000',
             }}>
               <h3 style={{ fontSize: '1.8rem', marginBottom: '10px', marginTop: '0' }}>Overview</h3>
-              <p style={{ marginBottom: '0' }}>{animalInfo.extract}</p>
+              <p style={{ marginBottom: '0' }}>{animalInfo}</p>
             </div>
 
             {/* Scientific Classification Section */}
@@ -289,7 +233,7 @@ const App = () => {
               {scientificClassification && Object.keys(scientificClassification).length > 0 ? (
                 <ul style={{ lineHeight: '2rem', marginBottom: '0' }}>
                   {Object.entries(scientificClassification).map(([key, value]) => (
-                    <li key={key}><strong>{key}:</strong> {value}</li>
+                    <li key={Object.entries(value)[0][0]}><strong>{Object.entries(value)[0][0]}:</strong> {Object.entries(value)[0][1]}</li>
                   ))}
                 </ul>
               ) : (
